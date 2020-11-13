@@ -1,4 +1,4 @@
-package go_auth
+package main
 
 import "time"
 
@@ -7,6 +7,13 @@ type Policy struct {
 	audience  string
 	subject   string
 	expiresIn time.Duration
+}
+
+type VerificationPolicy struct {
+		issuer    string
+		audience  string
+		subject   string
+		expiresIn time.Duration
 }
 
 type Policies []*Policy

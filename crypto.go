@@ -1,4 +1,4 @@
-package go_auth
+package main
 
 import (
 	"crypto/aes"

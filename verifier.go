@@ -1,4 +1,4 @@
-package go_auth
+package main
 
 import (
 	"errors"
@@ -15,7 +15,6 @@ type Verifier struct {
 type Token struct {
 	Id     string
 	Policy Policy
-	Claims jwt.MapClaims
 }
 
 func (v Verifier) MatchPolicy(issuer, audience, subject string) (Policy, bool) {
@@ -41,30 +40,30 @@ func (v Verifier) Decode(token string) (jwt.MapClaims, error) {
 	return claims, nil
 }
 
-func (v Verifier) Deconstruct(token string) (Token, error) {
+func (v Verifier) Deconstruct(token string) (Token, string, error) {
 	claims, err := v.Decode(token)
 	if err != nil {
-		return Token{}, err
+		return Token{}, "", err
 	}
 
 	audience := claims["aud"].(string)
 	subject := claims["sub"].(string)
 	issuer := claims["iss"].(string)
-	id := claims["jid"].(string)
+	id := claims["jti"].(string)
 
 	policy, match := v.MatchPolicy(issuer, audience, subject)
 	if !match {
-		return Token{}, errors.New("unknown token does not match known policies")
+		return Token{}, "", errors.New("unknown token does not match known policies")
 	}
 
-	return Token{id, policy, claims["ctx"].(map[string]interface{})}, nil
+	return Token{id, policy}, claims["ctx"].(string), nil
 }
 
-func (v Verifier) Verify(token string) (Token, error) {
+func (v Verifier) Verify(token string, c interface{}) (Token, error) {
 	method := jwt.GetSigningMethod(v.store.GetAlgorithm())
 	parts := strings.Split(token, ".")
 
-	deconstructed, err := v.Deconstruct(token)
+	deconstructed, claimJSON, err := v.Deconstruct(token)
 	if err != nil {
 		return Token{}, err
 	}
@@ -84,5 +83,6 @@ func (v Verifier) Verify(token string) (Token, error) {
 		return Token{}, err
 	}
 
+	fromJSON(claimJSON, c)
 	return deconstructed, nil
 }

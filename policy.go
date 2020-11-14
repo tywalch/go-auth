@@ -1,19 +1,19 @@
-package go_auth
+package gothic
 
 import "time"
 
 type Policy struct {
-	issuer    string
-	audience  string
-	subject   string
-	expiresIn time.Duration
+	Issuer    string
+	Audience  string
+	Subject   string
+	ExpiresIn time.Duration
 }
 
 type VerificationPolicy struct {
-		issuer    string
-		audience  string
-		subject   string
-		expiresIn time.Duration
+	Issuer    string
+	Audience  string
+	Subject   string
+	ExpiresIn time.Duration
 }
 
 type Policies []*Policy

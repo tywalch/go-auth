@@ -1,4 +1,4 @@
-package go_auth
+package gothic
 
 import (
 	"encoding/json"
@@ -11,13 +11,13 @@ type Session struct {
 }
 
 type SessionStore interface {
-	get(string) ([]byte, error)
-	set(string, []byte, time.Duration) error
+	Get(string) ([]byte, error)
+	Set(string, []byte, time.Duration) error
 }
 
 type Sessionizer struct {
-	store  SessionStore
-	secret *string
+	Store  SessionStore
+	Secret *string
 }
 
 func (s Sessionizer) Serialize(session Session, ttl time.Duration) (string, error) {
@@ -31,12 +31,12 @@ func (s Sessionizer) Serialize(session Session, ttl time.Duration) (string, erro
 		return "", err
 	}
 
-	publicKey := Encrypt(privateKey, *s.secret)
+	publicKey := Encrypt(privateKey, *s.Secret)
 	if err != nil {
 		return "", err
 	}
 
-	err = s.store.set(privateKey, data, ttl)
+	err = s.Store.Set(privateKey, data, ttl)
 	if err != nil {
 		return "", err
 	}
@@ -46,9 +46,9 @@ func (s Sessionizer) Serialize(session Session, ttl time.Duration) (string, erro
 
 func (s Sessionizer) Deserialize(id string) (Session, error) {
 	session := Session{}
-	privateKey := Decrypt(id, *s.secret)
+	privateKey := Decrypt(id, *s.Secret)
 
-	data, err := s.store.get(privateKey)
+	data, err := s.Store.Get(privateKey)
 	if err != nil {
 		return session, err
 	}

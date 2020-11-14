@@ -1,4 +1,4 @@
-package go_auth
+package gothic
 
 import (
 	"github.com/dgrijalva/jwt-go"
@@ -6,14 +6,14 @@ import (
 )
 
 type Signer struct {
-	store  KeyStore
-	policy *Policy
+	Store  KeyStore
+	Policy *Policy
 }
 
 func (signer Signer) Sign(id string, c interface{}) (string, error) {
-	t := jwt.New(jwt.GetSigningMethod(signer.store.GetAlgorithm()))
+	t := jwt.New(jwt.GetSigningMethod(signer.Store.GetAlgorithm()))
 
-	key, err := signer.store.GetKey(signer.policy.issuer)
+	key, err := signer.Store.GetKey(signer.Policy.Issuer)
 	if err != nil {
 		return "", err
 	}
@@ -31,10 +31,10 @@ func (signer Signer) Sign(id string, c interface{}) (string, error) {
 	t.Claims = &TokenClaims{
 		Context: context,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(signer.policy.expiresIn).Unix(),
-			Issuer:    signer.policy.issuer,
-			Subject:   signer.policy.subject,
-			Audience:  signer.policy.audience,
+			ExpiresAt: time.Now().Add(signer.Policy.ExpiresIn).Unix(),
+			Issuer:    signer.Policy.Issuer,
+			Subject:   signer.Policy.Subject,
+			Audience:  signer.Policy.Audience,
 			Id:        id,
 		},
 	}

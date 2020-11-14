@@ -1,4 +1,4 @@
-package go_auth
+package gothic
 
 import (
 	"errors"
@@ -8,8 +8,8 @@ import (
 )
 
 type Verifier struct {
-	store    KeyStore
-	policies []*Policy
+	Store    KeyStore
+	Policies []*Policy
 }
 
 type Token struct {
@@ -18,9 +18,9 @@ type Token struct {
 }
 
 func (v Verifier) MatchPolicy(issuer, audience, subject string) (Policy, bool) {
-	for i := 0; i < len(v.policies); i++ {
-		policy := *v.policies[i]
-		if match := issuer == policy.issuer && audience == policy.audience && subject == policy.subject; match {
+	for i := 0; i < len(v.Policies); i++ {
+		policy := *v.Policies[i]
+		if match := issuer == policy.Issuer && audience == policy.Audience && subject == policy.Subject; match {
 			return policy, match
 		}
 	}
@@ -60,7 +60,7 @@ func (v Verifier) Deconstruct(token string) (Token, string, error) {
 }
 
 func (v Verifier) Verify(token string, c interface{}) (Token, error) {
-	method := jwt.GetSigningMethod(v.store.GetAlgorithm())
+	method := jwt.GetSigningMethod(v.Store.GetAlgorithm())
 	parts := strings.Split(token, ".")
 
 	deconstructed, claimJSON, err := v.Deconstruct(token)
@@ -68,7 +68,7 @@ func (v Verifier) Verify(token string, c interface{}) (Token, error) {
 		return Token{}, err
 	}
 
-	keyName, err := v.store.GetKey(deconstructed.Policy.issuer)
+	keyName, err := v.Store.GetKey(deconstructed.Policy.Issuer)
 	if err != nil {
 		return Token{}, err
 	}
